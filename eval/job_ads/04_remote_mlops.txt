@@ -1,0 +1,16 @@
+Working Student MLOps (all genders) – CloudMinds GmbH, fully remote (Germany)
+
+Help us bring machine learning models into production.
+
+Tasks:
+- Package models in Docker containers
+- Maintain CI/CD pipelines in GitHub Actions
+- Write Python tooling for model deployment
+- Support our Kubernetes and Terraform setup
+
+Requirements:
+- Python, Docker, GitHub Actions
+- Kubernetes or Terraform is a plus but we will teach you
+- English (team language)
+
+Conditions: 15–20 hours per week, 100% remote from anywhere in Germany.

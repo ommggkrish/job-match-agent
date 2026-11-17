@@ -1,0 +1,13 @@
+Working Student Backend Development (Python) – Spreeware GmbH, Berlin
+
+You will:
+- Build REST endpoints in Python with Django
+- Work with PostgreSQL and write tests
+- Join our daily stand-ups in our Berlin office
+
+You have:
+- Python experience, ideally Django
+- PostgreSQL basics
+- Fluent English, German not needed
+
+Details: up to 20 hours per week, on-site in Berlin-Kreuzberg (no remote option).

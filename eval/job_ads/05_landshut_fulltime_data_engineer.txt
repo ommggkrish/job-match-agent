@@ -1,0 +1,15 @@
+Junior Data Engineer (m/f/d) – Isar Analytics GmbH, Landshut
+
+Full-time position (40 hours per week), permanent contract.
+
+Responsibilities:
+- Build data pipelines with Python, SQL and Apache Spark
+- Orchestrate jobs with Airflow
+- Maintain our data warehouse
+
+Profile:
+- Completed degree in computer science or similar
+- Python, SQL, Spark, Airflow
+- English required, German is a plus
+
+Location: Landshut, hybrid (3 office days).

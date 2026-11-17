@@ -1,0 +1,14 @@
+Working Student DevOps / MLOps (m/f/d) – Oberpfalz Tech GmbH, Regensburg
+
+Tasks:
+- Automate build and deployment with CI/CD pipelines
+- Containerise Python services with Docker
+- Work on Linux servers and our Azure cloud
+
+Requirements:
+- Python, Docker, Linux
+- Experience with CI/CD (e.g. GitHub Actions)
+- Azure is a plus
+- English; German is nice to have
+
+Offer: max. 20 hours per week, hybrid in Regensburg.

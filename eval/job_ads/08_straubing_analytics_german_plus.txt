@@ -1,0 +1,15 @@
+Working Student Data Analytics (m/f/d) – BioRegio Straubing GmbH
+
+We analyse data from bio-based production plants.
+
+Your tasks:
+- Analyse production data with Python and pandas
+- Write SQL queries and automate reports
+- Build small internal dashboards (Streamlit or Tableau)
+
+Your profile:
+- Python, pandas, SQL
+- Streamlit or Tableau experience is nice to have
+- English is required, German is a plus
+
+We offer: 20 hours per week, hybrid in Straubing (1–2 office days).

@@ -1,0 +1,15 @@
+Student Research Assistant – Computer Vision Lab, Technology Campus Deggendorf
+
+The lab works on image analysis for medical and industrial applications.
+
+Tasks:
+- Implement and train neural networks in PyTorch
+- Prepare image datasets with Python and OpenCV
+- Document experiments in Jupyter notebooks
+
+Requirements:
+- Enrolled student (AI, computer science, physics)
+- Python, PyTorch basics, ideally OpenCV
+- English; German not required
+
+Hours: 10–15 hours per week, on-site in Deggendorf, flexible schedule.

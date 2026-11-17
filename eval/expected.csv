@@ -1,0 +1,13 @@
+file,fit,location_ok,hours_ok,language_ok
+01_munich_ml_working_student.txt,yes,yes,yes,yes
+02_regensburg_data_analyst_german.txt,no,yes,yes,no
+03_berlin_onsite_backend.txt,no,no,yes,yes
+04_remote_mlops.txt,yes,yes,yes,yes
+05_landshut_fulltime_data_engineer.txt,no,yes,no,yes
+06_deggendorf_research_assistant.txt,yes,yes,yes,yes
+07_munich_frontend_react.txt,no,yes,yes,yes
+08_straubing_analytics_german_plus.txt,yes,yes,yes,yes
+09_remote_llm_engineer.txt,yes,yes,yes,yes
+10_freising_qa_good_german.txt,no,yes,yes,no
+11_munich_fulltime_sap_german.txt,no,yes,no,no
+12_regensburg_mlops_working_student.txt,yes,yes,yes,yes

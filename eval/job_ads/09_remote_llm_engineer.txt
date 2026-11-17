@@ -1,0 +1,17 @@
+Working Student AI Engineer – LLM Applications (m/f/d) – Hafenblick AI GmbH, Hamburg / remote
+
+Build assistants on top of large language models.
+
+Tasks:
+- Integrate LLM APIs (Gemini, OpenAI) into our Python backend
+- Build retrieval-augmented generation (RAG) pipelines
+- Expose features through FastAPI services
+- Evaluate model answers
+
+Requirements:
+- Python and first experience with LLM APIs
+- FastAPI or another web framework
+- LangChain or RAG experience is a plus
+- English (our team language)
+
+Conditions: 20 hours per week, fully remote within Germany.

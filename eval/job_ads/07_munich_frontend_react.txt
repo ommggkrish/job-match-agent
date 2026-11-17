@@ -1,0 +1,13 @@
+Working Student Frontend Developer (m/f/d) – PixelPark Studio, Munich (hybrid)
+
+Tasks:
+- Build user interfaces in React and TypeScript
+- Turn Figma designs into responsive pages with CSS
+- Write component tests with Jest
+
+Profile:
+- Solid experience with React, TypeScript and CSS
+- Experience with Figma and Jest
+- English; German is a plus
+
+Offer: up to 20 hours per week, hybrid in Munich-Schwabing.

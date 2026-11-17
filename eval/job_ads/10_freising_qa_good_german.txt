@@ -1,0 +1,13 @@
+Working Student Software Testing (m/f/d) – AgriSoft GmbH, Freising
+
+Tasks:
+- Write automated tests with Python, pytest and Selenium
+- Test our web application before releases
+- Write test reports for our German-speaking customers
+
+Profile:
+- Python and pytest, ideally Selenium
+- Good German skills (at least B2) are required because you will talk to customers
+- English
+
+Offer: 15–20 hours per week, on-site in Freising.

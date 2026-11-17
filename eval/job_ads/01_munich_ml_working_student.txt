@@ -1,0 +1,17 @@
+Working Student Machine Learning (m/f/d) – NordAI Labs GmbH, Munich (hybrid)
+
+About us: NordAI Labs builds computer-vision models for quality inspection in factories.
+
+Your tasks:
+- Train and evaluate deep learning models with PyTorch
+- Clean and analyse datasets with Python and pandas
+- Write SQL queries against our experiment database
+- Keep code clean with Git and code reviews
+
+Your profile:
+- Student of computer science, AI or a similar field
+- Good Python skills, first experience with PyTorch or scikit-learn
+- Basic SQL, Git
+- Very good English; German is not required (our team language is English)
+
+What we offer: 16–20 hours per week during the semester, hybrid work (2 days per week in our Munich office), flexible hours.

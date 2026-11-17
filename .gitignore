@@ -1,0 +1,17 @@
+# Secrets and personal data – never commit
+.env
+data/my_cv.md
+.streamlit/secrets.toml
+
+# Personal planning notes
+plan.md
+prompt.md
+
+# Python
+.venv/
+__pycache__/
+.pytest_cache/
+
+# System files
+.DS_Store
+Thumbs.db
