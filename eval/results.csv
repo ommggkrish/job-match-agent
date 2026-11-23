@@ -1,0 +1,2 @@
+file,model,date,score,verdict,fit,location_ok,hours_ok,language_ok
+01_munich_ml_working_student.txt,gemini-3.5-flash,2026-11-23,100,strong fit,yes,yes,yes,yes
