@@ -8,6 +8,8 @@ Tests replace this class with a fake, so they run without an API key.
 """
 
 import os
+import re
+import time
 from dataclasses import dataclass, field
 from typing import Any, Protocol, TypeVar
 
@@ -16,6 +18,15 @@ from pydantic import BaseModel
 T = TypeVar("T", bound=BaseModel)
 
 DEFAULT_MODEL = "gemini-3.5-flash"
+
+MAX_RATE_LIMIT_WAIT = 120  # seconds; longer waits mean the daily quota is used up
+MAX_RATE_LIMIT_RETRIES = 3
+
+
+def retry_delay_seconds(exc) -> float | None:
+    """Read Google's 'retryDelay': '37s' from a 429 error. None if it is not there."""
+    match = re.search(r"retryDelay'?\"?\s*:\s*'?\"?(\d+(?:\.\d+)?)s", str(exc))
+    return float(match.group(1)) if match else None
 
 
 @dataclass
@@ -49,6 +60,27 @@ class GeminiClient:
             raise RuntimeError("GEMINI_API_KEY is not set. Copy .env.example to .env and add your key.")
         self.model = model or os.getenv("GEMINI_MODEL") or DEFAULT_MODEL
         self.client = genai.Client(api_key=api_key)
+        self.sleep = time.sleep  # replaced in tests
+
+    # ------------------------------------------------------- rate-limit retry
+
+    def _generate(self, contents, config):
+        """generate_content with a wait-and-retry for the per-minute rate limit.
+
+        The free tier limits requests per minute AND per day. Both return HTTP 429.
+        A short "retry in N seconds" means the per-minute limit: wait and try again.
+        A long one (hours) means the daily limit: give up and raise the error.
+        """
+        from google.genai.errors import ClientError
+
+        for attempt in range(MAX_RATE_LIMIT_RETRIES + 1):
+            try:
+                return self.client.models.generate_content(model=self.model, contents=contents, config=config)
+            except ClientError as exc:
+                wait = retry_delay_seconds(exc)
+                if exc.code != 429 or wait is None or wait > MAX_RATE_LIMIT_WAIT or attempt == MAX_RATE_LIMIT_RETRIES:
+                    raise
+                self.sleep(wait + 1)
 
     # ------------------------------------------------------------------ tools
 
@@ -66,9 +98,7 @@ class GeminiClient:
             tools=[types.Tool(function_declarations=declarations)],
             temperature=0,
         )
-        response = self.client.models.generate_content(
-            model=self.model, contents=self._to_contents(messages), config=config
-        )
+        response = self._generate(contents=self._to_contents(messages), config=config)
         content = response.candidates[0].content
         calls = [
             ToolCall(name=fc.name, args=dict(fc.args or {}), id=fc.id) for fc in (response.function_calls or [])
@@ -129,5 +159,5 @@ class GeminiClient:
             response_schema=schema,
             temperature=0,
         )
-        response = self.client.models.generate_content(model=self.model, contents=prompt, config=config)
+        response = self._generate(contents=prompt, config=config)
         return schema.model_validate_json(response.text)  # raises if the JSON does not fit the model

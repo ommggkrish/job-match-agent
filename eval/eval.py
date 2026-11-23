@@ -10,7 +10,8 @@ right away, and the next run continues with the missing ads. This matters on the
 free tier, which allows only about 20 requests per model per day (one ad needs ~5).
 
 API failures (quota, overload, network) skip the ad instead of counting it as wrong.
-A quota error (429) stops the run. A real agent failure (e.g. invalid JSON) counts as wrong.
+The per-minute rate limit is handled in agent/llm.py (wait and retry); only the daily
+limit stops the run. A real agent failure (e.g. invalid JSON) counts as wrong.
 
 Labels compared per ad: fit (strong/possible fit = yes), location_ok, hours_ok, language_ok.
 The summary over all saved results for this model is written to eval/results.md.
@@ -34,7 +35,7 @@ except ImportError:
     from httpx import TransportError as NetworkError  # noqa: E402
 
 from agent.agent import run_agent  # noqa: E402
-from agent.llm import GeminiClient  # noqa: E402
+from agent.llm import MAX_RATE_LIMIT_WAIT, GeminiClient, retry_delay_seconds  # noqa: E402
 
 EVAL_DIR = ROOT / "eval"
 EXPECTED_CSV = EVAL_DIR / "expected.csv"
@@ -112,7 +113,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--only", nargs="+", help="(re-)run ads whose file name starts with these, e.g. --only 02 03")
     parser.add_argument("--fresh", action="store_true", help="delete saved results for this model first")
-    parser.add_argument("--delay", type=float, default=2, help="seconds to wait between ads")
+    parser.add_argument("--delay", type=float, default=15, help="seconds to wait between ads (per-minute limit)")
     args = parser.parse_args()
 
     load_dotenv(ROOT / ".env")
@@ -140,8 +141,10 @@ def main() -> None:
             # The API failed – that says nothing about the agent, so the ad is skipped.
             print(f"SKIPPED {row['file']}: {str(exc)[:150]}")
             if getattr(exc, "code", None) == 429:
-                print("\nDaily quota used up – stopping. Run the same command again tomorrow.")
-                break
+                wait = retry_delay_seconds(exc)
+                if wait is None or wait > MAX_RATE_LIMIT_WAIT:
+                    print("\nDaily quota used up – stopping. Run the same command again tomorrow.")
+                    break
             continue
         except Exception as exc:  # the agent itself failed – counts as wrong
             print(f"AGENT ERROR on {row['file']}: {exc}")

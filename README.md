@@ -17,7 +17,7 @@ or are far away, and checking each one by hand takes time.
   so they are predictable and unit-tested. The score is computed by code too.
 - **Evaluation** – 12 labelled job ads and `eval/eval.py`, which measures how often the agent
   gets the labels right.
-- **Engineering** – 29 pytest tests with a fake LLM (no API key needed), GitHub Actions CI, Dockerfile.
+- **Engineering** – 33 pytest tests with a fake LLM (no API key needed), GitHub Actions CI, Dockerfile.
 
 ## How it works
 
@@ -81,6 +81,8 @@ One ad needs about 5 API requests, and the Gemini free tier allows only about 20
 model per day. So the eval is **resumable**: every finished ad is saved to `eval/results.csv`
 right away, a quota error stops the run, and the next run continues with the missing ads.
 API failures (quota, overload, network) are skipped, not counted as wrong answers.
+The per-minute rate limit is handled in `agent/llm.py`: if Google says "retry in 20 s", the
+client waits and retries; only a wait of hours (the daily limit) stops the run.
 
 Result: *in progress – the number will be added here once all 12 ads have run
 (full table in `eval/results.md`).*
