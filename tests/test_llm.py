@@ -1,8 +1,8 @@
-"""Offline tests for the Gemini client: message conversion only, no API call."""
+"""Offline tests for the Gemini client: message conversion and retry rules, no API call."""
 
 import pytest
 
-from agent.llm import GeminiClient, ToolCall, retry_delay_seconds
+from agent.llm import GeminiClient, ToolCall, is_daily_limit, retry_delay_seconds
 
 
 def test_tool_results_are_grouped_into_one_user_turn():
@@ -21,12 +21,25 @@ def test_tool_results_are_grouped_into_one_user_turn():
     assert responses[0].response == {"result": {"skills": ["Python"]}}
 
 
-def make_429(retry_delay: str):
+PER_MINUTE = "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+PER_DAY = "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+
+
+def make_429(retry_delay: str | None, quota_id: str = PER_MINUTE):
+    """A 429 error shaped like the real ones from the Gemini API."""
     from google.genai.errors import ClientError
 
-    body = {"error": {"code": 429, "message": "quota", "status": "RESOURCE_EXHAUSTED",
-                      "details": [{"@type": "type.googleapis.com/google.rpc.RetryInfo", "retryDelay": retry_delay}]}}
+    details = [{"@type": "type.googleapis.com/google.rpc.QuotaFailure", "violations": [{"quotaId": quota_id}]}]
+    if retry_delay:
+        details.append({"@type": "type.googleapis.com/google.rpc.RetryInfo", "retryDelay": retry_delay})
+    body = {"error": {"code": 429, "message": "quota", "status": "RESOURCE_EXHAUSTED", "details": details}}
     return ClientError(429, body)
+
+
+def make_503():
+    from google.genai.errors import ServerError
+
+    return ServerError(503, {"error": {"code": 503, "message": "high demand", "status": "UNAVAILABLE"}})
 
 
 class FlakyModels:
@@ -64,8 +77,23 @@ def test_per_minute_limit_waits_and_retries():
     assert client.waits == [21, 6]
 
 
+def test_per_minute_limit_without_retry_delay_waits_one_minute():
+    client = make_client([make_429(None)])
+    assert client._generate(contents="hi", config=None) == "ok"
+    assert client.waits == [61]
+
+
+def test_overloaded_model_is_retried():
+    client = make_client([make_503()])
+    assert client._generate(contents="hi", config=None) == "ok"
+    assert client.waits == [21]
+
+
 def test_daily_limit_is_raised_immediately():
-    client = make_client([make_429("79590s")])
+    error = make_429("79590s", quota_id=PER_DAY)
+    assert is_daily_limit(error)
+    assert not is_daily_limit(make_429("20s"))
+    client = make_client([error])
     with pytest.raises(Exception, match="429"):
         client._generate(contents="hi", config=None)
     assert client.waits == []

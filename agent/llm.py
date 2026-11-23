@@ -19,14 +19,34 @@ T = TypeVar("T", bound=BaseModel)
 
 DEFAULT_MODEL = "gemini-3.5-flash"
 
-MAX_RATE_LIMIT_WAIT = 120  # seconds; longer waits mean the daily quota is used up
-MAX_RATE_LIMIT_RETRIES = 3
+MAX_RETRIES = 3
+MAX_WAIT = 120  # seconds
+DEFAULT_RATE_LIMIT_WAIT = 60  # per-minute limit without a retryDelay: wait one minute
+OVERLOAD_WAIT = 20  # 503 "model is experiencing high demand"
 
 
 def retry_delay_seconds(exc) -> float | None:
     """Read Google's 'retryDelay': '37s' from a 429 error. None if it is not there."""
     match = re.search(r"retryDelay'?\"?\s*:\s*'?\"?(\d+(?:\.\d+)?)s", str(exc))
     return float(match.group(1)) if match else None
+
+
+def is_daily_limit(exc) -> bool:
+    """True if the error is the free tier's per-DAY quota (waiting minutes will not help).
+
+    Google names the quota in the error, e.g. 'GenerateRequestsPerDayPerProjectPerModel-FreeTier'.
+    """
+    return getattr(exc, "code", None) == 429 and "PerDay" in str(exc)
+
+
+def wait_before_retry(exc) -> float | None:
+    """How long to wait before retrying this API error, or None if retrying makes no sense."""
+    code = getattr(exc, "code", None)
+    if code == 429 and not is_daily_limit(exc):
+        return min(retry_delay_seconds(exc) or DEFAULT_RATE_LIMIT_WAIT, MAX_WAIT)
+    if code == 503:
+        return OVERLOAD_WAIT
+    return None
 
 
 @dataclass
@@ -65,20 +85,20 @@ class GeminiClient:
     # ------------------------------------------------------- rate-limit retry
 
     def _generate(self, contents, config):
-        """generate_content with a wait-and-retry for the per-minute rate limit.
+        """generate_content with wait-and-retry for temporary API errors.
 
-        The free tier limits requests per minute AND per day. Both return HTTP 429.
-        A short "retry in N seconds" means the per-minute limit: wait and try again.
-        A long one (hours) means the daily limit: give up and raise the error.
+        - 429 per-MINUTE limit: wait (Google's retryDelay, or 60 s) and try again
+        - 503 model overloaded: wait 20 s and try again
+        - 429 per-DAY limit, or any other error: raise at once
         """
-        from google.genai.errors import ClientError
+        from google.genai.errors import APIError
 
-        for attempt in range(MAX_RATE_LIMIT_RETRIES + 1):
+        for attempt in range(MAX_RETRIES + 1):
             try:
                 return self.client.models.generate_content(model=self.model, contents=contents, config=config)
-            except ClientError as exc:
-                wait = retry_delay_seconds(exc)
-                if exc.code != 429 or wait is None or wait > MAX_RATE_LIMIT_WAIT or attempt == MAX_RATE_LIMIT_RETRIES:
+            except APIError as exc:
+                wait = wait_before_retry(exc)
+                if wait is None or attempt == MAX_RETRIES:
                     raise
                 self.sleep(wait + 1)
 
